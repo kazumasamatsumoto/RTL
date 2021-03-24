@@ -1,30 +1,29 @@
 import React from 'react';
+import axios from 'axios';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import App from './App';
 
+jest.mock('axios');
+
 describe('App', () => {
-  test('renders App component', () => {
+  test('fetches stories from an API and displays them', async () => {
+    const stories = [
+      { objectID: '1', title: 'Hello' },
+      { objectID: '2', title: 'React' },
+    ];
+
+    axios.get.mockImplementationOnce(() =>
+      Promise.resolve({ data: { hits: stories } })
+    );
+
     render(<App />);
 
-    // fails
-    // expect(screen.getByText('Search')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button'));
 
-    // succeeds
-    expect(screen.getByText('Search:')).toBeInTheDocument();
+    const items = await screen.findAllByRole('listitem');
 
-    // succeeds
-    expect(screen.getByText(/Searche/)).toBeInTheDocument();
+    expect(items).toHaveLength(2);
   });
-
-  test('renders App component role', () => {
-    render(<App />);
-
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
-  });
-
-  test('renders App component getByText', () => {
-    render(<App />);
-    expect(screen.queryByText(/Searches for JavaScript/)).toBeNull();
-  })
 });
